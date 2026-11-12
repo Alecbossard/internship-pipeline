@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Internship Pipeline | Portfolio demo</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="demo.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a href="https://github.com/Alecbossard/internship-pipeline">Internship Pipeline</a>
+    <span>Portfolio demo · Fictional offers</span>
+  </header>
+  <main>
+    <section class="intro">
+      <p class="eyebrow">OFFER TRIAGE</p>
+      <h1>Review an internship.</h1>
+      <p>Swipe left to dismiss an offer or right to review your approval. Use the buttons on desktop or save an offer for later.</p>
+      <dl class="counts" aria-live="polite">
+        <div><dt>In queue</dt><dd id="remaining">3</dd></div>
+        <div><dt>Saved</dt><dd id="saved">0</dd></div>
+        <div><dt>Approved</dt><dd id="approved">0</dd></div>
+      </dl>
+      <p id="feedback" role="status">Choose what happens to the offer on the card.</p>
+      <button id="reset" class="quiet" type="button">Restart demo ↻</button>
+    </section>
+    <section class="deck" aria-label="Internship offers">
+      <article id="card" class="card" aria-labelledby="role">
+        <div class="employer"><span id="monogram" aria-hidden="true"></span><span id="company"></span></div>
+        <h2 id="role"></h2>
+        <dl class="metadata"><div><dt>Location</dt><dd id="location"></dd></div><div><dt>Duration</dt><dd id="duration"></dd></div></dl>
+        <h3>What you would work on</h3>
+        <p id="mission"></p>
+        <button id="details" class="quiet" type="button">Read full sample posting ↗</button>
+        <div class="actions">
+          <button id="dismiss" class="dismiss" type="button">Dismiss</button>
+          <button id="later" type="button">Save for later</button>
+          <button id="apply" class="primary" type="button">Review approval →</button>
+        </div>
+      </article>
+      <div id="empty" class="card" hidden><h2>Queue reviewed.</h2><p>Restart the demo to review the sample offers again.</p></div>
+    </section>
+  </main>
+  <dialog id="dialog" aria-labelledby="dialog-title">
+    <h2 id="dialog-title"></h2>
+    <p id="dialog-text"></p>
+    <form method="dialog" class="actions">
+      <button id="cancel" value="cancel">Back to offer</button>
+      <button id="confirm" value="approve" class="primary">Simulate approval</button>
+    </form>
+  </dialog>
+</body>
+</html>
