@@ -17,6 +17,19 @@ The demo follows one fictional dossier through three views adapted from the live
 
 To run it locally, download the repository and open `demo/index.html`.
 
+## Recovery example
+
+An application for **Juniper Robotics Lab** is interrupted after the submission intent is saved and the browser clicks Submit. At startup, the service reloads the dossier and checks the outcome of the original attempt. [Try the interrupted submission](https://alecbossard.github.io/internship-pipeline/demo/#recovery)
+
+| Step | Dossier status | What the service does |
+| --- | --- | --- |
+| Process interrupted | `running` | Keeps the saved submission intent with the original attempt time. |
+| Service restarted | `uncertain` | Restores the dossier. An explicit receipt check can now inspect the saved attempt. |
+| First inbox check finds no match | `uncertain` | Schedules a read-only retry within the receipt-check limit. |
+| Second check finds a matching receipt | `submitted` | Attaches the receipt and retains the original attempt time. |
+
+An isolated test exercised the project's recovery code with a temporary dossier and fixture email responses. The recorded worker launches were **two receipt checks and zero submission replays**. The public walkthrough uses the same sequence with simulated results.
+
 ## How the live workflow works
 
 The user starts a search or imports an offer. The service applies eligibility criteria, deduplicates results and records source links. The user reviews an offer and explicitly approves it before application work can start.

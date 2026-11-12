@@ -76,6 +76,8 @@ dialog::backdrop { background: #292a2677; }
 .timeline li { border-top: 3px solid var(--line); padding: .45rem .15rem 0; color: var(--muted); font-size: .77rem; }
 .timeline [data-state="done"] { border-color: #8caa8d; color: var(--green); }
 .timeline [data-state="current"] { border-color: #a95c40; color: var(--accent); font-weight: 700; }
+.timeline [data-state="uncertain"] { border-color: #a95c40; color: var(--accent); }
+.timeline [data-state="uncertain"]::after { content: " · outcome uncertain"; }
 .evidence, .question { background: #f4f3ed; padding: 1rem; border-radius: .7rem; }
 .question { margin-top: .7rem; background: #f7eee7; }
 .evidence p:last-child, .question p:last-child { margin-bottom: 0; }

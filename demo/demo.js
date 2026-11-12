@@ -13,6 +13,7 @@ let position = 0;
 let saved = 0;
 let application = null;
 let stageIndex = 0;
+let incidentIndex = null;
 let approvalOffer = null;
 let gesture = null;
 let events = [];
@@ -31,6 +32,15 @@ const stages = [
   { phase: 4, status: 'Application sent · receipt confirmed', title: 'Matching email receipt', text: 'The confirmation email matched the employer, role and reference. The receipt is available in the dossier.', evidence: 'receipt', event: 'Matching email receipt saved to the dossier.' },
 ];
 
+const incidentStages = [
+  { phase: 3, status: 'Submission interrupted', title: 'The attempt was recorded before the interruption', text: 'The service saved the submission intent before the browser clicked Submit. The process then stopped before it could record a portal confirmation.', evidence: 'running', next: 'Restart sample service', event: 'Submission intent saved. Process interrupted before confirmation.' },
+  { phase: 4, status: 'Submission outcome uncertain', title: 'Dossier restored from disk', text: 'At startup the service reloads the dossier and marks the interrupted submission uncertain. The submission scheduler skips it. The candidate can request a read-only receipt check for the saved attempt.', evidence: 'uncertain', uncertain: true, next: 'Check sample inbox', event: 'Restart restored the original dossier. Submission outcome marked uncertain.' },
+  { phase: 4, status: 'Submission outcome uncertain', title: 'First receipt check found nothing', text: 'The outcome stays uncertain. The service schedules another receipt read within its retry limit and keeps the original submission attempt.', evidence: 'uncertain', uncertain: true, next: 'Run the next scheduled check', event: 'First receipt check found nothing. A read-only retry was scheduled.' },
+  { ...stages.at(-1), title: 'Original submission confirmed', text: 'The second check found an authenticated receipt for the saved attempt. The service attached the evidence and marked the original dossier submitted using the original attempt time.', event: 'Matching receipt confirmed the original submission. No submission replay.' },
+];
+
+const currentStage = () => incidentIndex === null ? stages[stageIndex] : incidentStages[incidentIndex];
+
 const views = {
   offers: ['Good leads.', 'Review an offer and follow it through to the application receipt.'],
   applications: ['Taking shape.', 'Follow the documents, review and submission for your approved offer.'],
@@ -38,7 +48,19 @@ const views = {
 };
 
 function showView(focus = false) {
-  const requested = location.hash.slice(1);
+  let requested = location.hash.slice(1);
+  if (requested === 'recovery') {
+    application = offers[0];
+    position = 1;
+    saved = 0;
+    stageIndex = 7;
+    incidentIndex = 0;
+    events = [...stages.slice(0, stageIndex + 1).map(stage => stage.event), currentStage().event];
+    byId('feedback').textContent = '';
+    requested = 'applications';
+    history.replaceState(null, '', '#applications');
+    render();
+  }
   const view = Object.hasOwn(views, requested) ? requested : 'offers';
   for (const name of Object.keys(views)) byId(name).hidden = name !== view;
   for (const link of document.querySelectorAll('[data-view]')) {
@@ -52,11 +74,11 @@ function showView(focus = false) {
 function renderProgress() {
   byId('dossier').hidden = !application;
   byId('application-empty').hidden = Boolean(application);
-  const stage = application ? stages[stageIndex] : null;
-  const done = stageIndex === stages.length - 1;
+  const stage = application ? currentStage() : null;
+  const done = stage?.evidence === 'receipt';
   byId('agents').replaceChildren(...phases.map((phase, index) => {
     const row = document.createElement('li');
-    const status = stage?.phase === index && !done ? (stageIndex === 6 ? 'Waiting for answer' : stage.status) : 'Idle';
+    const status = stage?.phase === index && !done ? stage.status : 'Idle';
     row.textContent = `${phase} · ${status}`;
     return row;
   }));
@@ -75,27 +97,38 @@ function renderProgress() {
   byId('timeline').replaceChildren(...phases.map((phase, index) => {
     const item = document.createElement('li');
     item.textContent = phase;
-    item.dataset.state = done || index < stage.phase ? 'done' : index === stage.phase ? 'current' : 'pending';
+    item.dataset.state = stage.uncertain && index === 3 ? 'uncertain' : done || index < stage.phase ? 'done' : index === stage.phase ? 'current' : 'pending';
     if (item.dataset.state === 'current') item.setAttribute('aria-current', 'step');
     return item;
   }));
   byId('evidence-title').textContent = stage.title;
   byId('evidence-text').textContent = stage.text;
   byId('view-evidence').hidden = !stage.evidence;
-  byId('view-evidence').textContent = stage.evidence === 'posting' ? 'Read captured source ↗' : stage.evidence === 'receipt' ? 'Read sample receipt ↗' : 'Preview sample documents ↗';
-  byId('question').hidden = stageIndex !== 6;
+  const evidenceLabels = { posting: 'Read captured source ↗', receipt: 'Read sample receipt ↗', running: 'View saved attempt ↗', uncertain: 'View restored state ↗' };
+  byId('view-evidence').textContent = evidenceLabels[stage.evidence] || 'Preview sample documents ↗';
+  byId('question').hidden = stage !== stages[6];
+  byId('interrupt').hidden = stage !== stages[7];
   byId('demo-controls').hidden = !stage.next;
   byId('next').textContent = stage.next || '';
 }
 
 function step() {
-  stageIndex += 1;
-  const stage = stages[stageIndex];
+  if (incidentIndex === null) stageIndex += 1;
+  else incidentIndex += 1;
+  const stage = currentStage();
   events.push(stage.event);
   byId('feedback').textContent = '';
   renderProgress();
-  if (stageIndex === 6) byId('answer').focus();
-  if (stageIndex === stages.length - 1) byId('view-evidence').focus();
+  if (stage === stages[6]) byId('answer').focus();
+  if (stage.evidence === 'receipt') byId('view-evidence').focus();
+}
+
+function startIncident() {
+  incidentIndex = 0;
+  events.push(currentStage().event);
+  byId('feedback').textContent = '';
+  renderProgress();
+  byId('next').focus();
 }
 
 function render() {
@@ -160,22 +193,28 @@ byId('later').addEventListener('click', () => {
 });
 byId('reset').addEventListener('click', () => {
   position = saved = stageIndex = 0;
+  incidentIndex = null;
   application = null;
   events = [];
   location.hash = 'offers';
   byId('feedback').textContent = 'Walkthrough restarted.';
   render();
 });
-byId('next').addEventListener('click', () => { if (application && stages[stageIndex].next) step(); });
-byId('answer').addEventListener('click', () => { if (application && stageIndex === 6) { step(); byId('next').focus(); } });
+byId('next').addEventListener('click', () => { if (application && currentStage().next) step(); });
+byId('interrupt').addEventListener('click', () => { if (application && currentStage() === stages[7]) startIncident(); });
+byId('answer').addEventListener('click', () => { if (application && currentStage() === stages[6]) { step(); byId('next').focus(); } });
 byId('view-evidence').addEventListener('click', () => {
-  const kind = stages[stageIndex].evidence;
+  const kind = currentStage().evidence;
   if (kind === 'posting') openDialog('Captured sample posting', `${application.role} · ${application.company}\n${application.location} · ${application.duration}\n\n${application.mission}\n${application.requirements}`);
   if (kind === 'draft' || kind === 'corrected') {
     const bullet = kind === 'draft' ? 'Deployed a prototype on a physical robot.' : 'Implemented and evaluated a prototype in simulation.';
     openDialog('Sample document excerpts', `Résumé\n${bullet}\n\nCover letter\nI am applying for the ${application.role} position. My simulation project gave me practical experience prototyping and evaluating technical systems.`);
   }
   if (kind === 'receipt') openDialog('Sample confirmation email', `From: ${application.company} recruiting\nSubject: Application received — ${application.role}\nReference: DEMO-2027-001\n\nThank you for applying. We have received your application.`);
+  if (kind === 'running' || kind === 'uncertain') {
+    const state = kind === 'running' ? 'running (apply)' : 'uncertain';
+    openDialog('Saved sample attempt', `Reference: DEMO-2027-001\nRole: ${application.role}\nEmployer: ${application.company}\nAttempt: 1\nDossier status: ${state}`);
+  }
 });
 window.addEventListener('hashchange', () => showView(true));
 
