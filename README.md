@@ -1,12 +1,21 @@
 # Internship Pipeline
 
-**Human-in-the-loop LLM orchestration for internship applications.** A Python service coordinates the search, review and application workflow through a mobile web app and Telegram. This repository presents the architecture and a standalone demonstration of the offer triage interface.
+**Human-in-the-loop LLM orchestration for internship applications.** A Python service coordinates the search, review and application workflow through a mobile web app and Telegram. This repository presents the architecture and an interactive walkthrough of a complete application dossier.
 
 [Try the interactive demo](https://alecbossard.github.io/internship-pipeline/demo/) · [Browse the demo source](demo/)
 
-![Offer triage demo showing a fictional robotics internship with dismiss, save and review approval controls](preview.png)
+![Application dossier with verified offer, drafting, independent review, submission and receipt stages](preview.png)
 
-The demo runs in the browser on three fictional offers. Swipe right to open an approval dialog, swipe left to dismiss, or save the offer for later. To run it locally, download the repository and open `demo/index.html`.
+## Walk through a sample application
+
+The demo follows one fictional dossier through three views adapted from the live app. All evidence and worker results are scripted. Use the walkthrough controls to advance through the stages at your own pace.
+
+1. **Offers.** Inspect the sample posting, swipe to open approval and confirm the exact offer.
+2. **Applications.** Verify the captured posting, preview the draft résumé and letter, and follow an independent review that sends one unsupported claim back for correction.
+3. **Submission.** Answer the employer's availability question, resume the sample submission and open the matching email receipt.
+4. **Activity.** Inspect the worker statuses and the log of decisions and results.
+
+To run it locally, download the repository and open `demo/index.html`.
 
 ## How the live workflow works
 
@@ -46,4 +55,4 @@ I defined the requirements, designed the approval workflow and refined the inter
 
 ## Repository scope
 
-The source here implements the standalone interface demo. The case study describes the deployed personal application. The live service and candidate records are private.
+The source here implements the browser walkthrough. The case study describes the deployed personal application. The live service and candidate records are private.

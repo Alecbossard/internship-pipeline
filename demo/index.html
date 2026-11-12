@@ -4,27 +4,29 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Internship Pipeline | Portfolio demo</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="demo.js" defer></script>
+  <link rel="stylesheet" href="style.css?v=2">
+  <script src="demo.js?v=2" defer></script>
 </head>
 <body>
-  <header class="topbar">
-    <a href="https://github.com/Alecbossard/internship-pipeline">Internship Pipeline</a>
-    <span>Portfolio demo · Fictional offers</span>
-  </header>
+  <aside class="sidebar">
+    <a class="brand" href="https://github.com/Alecbossard/internship-pipeline"><span class="brand-mark" aria-hidden="true">a<span>.</span></span><span>Internship Pipeline<small>Portfolio walkthrough</small></span></a>
+    <nav aria-label="Main navigation">
+      <a href="#offers" data-view="offers" aria-current="page">Offers <span id="remaining">3</span></a>
+      <a href="#applications" data-view="applications">Applications <span id="application-count">0</span></a>
+      <a href="#activity" data-view="activity">Activity</a>
+    </nav>
+    <button id="reset" class="quiet" type="button">Restart walkthrough ↻</button>
+  </aside>
   <main>
-    <section class="intro">
-      <p class="eyebrow">OFFER TRIAGE</p>
-      <h1>Review an internship.</h1>
-      <p>Swipe left to dismiss an offer or right to review your approval. Use the buttons on desktop or save an offer for later.</p>
-      <dl class="counts" aria-live="polite">
-        <div><dt>In queue</dt><dd id="remaining">3</dd></div>
-        <div><dt>Saved</dt><dd id="saved">0</dd></div>
-        <div><dt>Approved</dt><dd id="approved">0</dd></div>
-      </dl>
-      <p id="feedback" role="status">Choose what happens to the offer on the card.</p>
-      <button id="reset" class="quiet" type="button">Restart demo ↻</button>
-    </section>
+    <header class="page-header">
+      <p class="eyebrow">FICTIONAL APPLICATION · INTERACTIVE WALKTHROUGH</p>
+      <h1 id="page-title" tabindex="-1">Good leads.</h1>
+      <p id="page-description">Review an offer and follow it through to the application receipt.</p>
+    </header>
+    <p id="feedback" role="status"></p>
+    <section id="offers" class="view" aria-label="Offers">
+      <div class="queue-bar"><span id="queue-label">3 offers to review</span><span id="saved-label">0 saved for later</span></div>
+      <p class="gesture-help">Swipe left to dismiss · Swipe right to open approval</p>
     <section class="deck" aria-label="Internship offers">
       <article id="card" class="card" aria-labelledby="role">
         <div class="employer"><span id="monogram" aria-hidden="true"></span><span id="company"></span></div>
@@ -32,14 +34,43 @@
         <dl class="metadata"><div><dt>Location</dt><dd id="location"></dd></div><div><dt>Duration</dt><dd id="duration"></dd></div></dl>
         <h3>What you would work on</h3>
         <p id="mission"></p>
-        <button id="details" class="quiet" type="button">Read full sample posting ↗</button>
+        <button id="details" class="quiet" type="button">Read original posting (sample) ↗</button>
         <div class="actions">
           <button id="dismiss" class="dismiss" type="button">Dismiss</button>
           <button id="later" type="button">Save for later</button>
-          <button id="apply" class="primary" type="button">Review approval →</button>
+          <button id="apply" class="primary" type="button">Apply →</button>
         </div>
       </article>
-      <div id="empty" class="card" hidden><h2>Queue reviewed.</h2><p>Restart the demo to review the sample offers again.</p></div>
+      <div id="empty" class="card" hidden><h2>Queue reviewed.</h2><p>Restart the walkthrough to review the sample offers again.</p></div>
+    </section>
+    </section>
+    <section id="applications" class="view" aria-label="Applications" hidden>
+      <div id="application-empty" class="panel"><h2>No application yet</h2><p>Approve an offer to start a dossier.</p><a href="#offers">Review offers →</a></div>
+      <article id="dossier" class="panel" hidden>
+        <p id="dossier-company" class="employer-name"></p>
+        <h2 id="dossier-title"></h2>
+        <p id="dossier-location" class="muted"></p>
+        <span id="dossier-status" class="status" role="status"></span>
+        <ol id="timeline" class="timeline" aria-label="Application progress"></ol>
+        <section class="evidence" aria-labelledby="evidence-title">
+          <h3 id="evidence-title"></h3>
+          <p id="evidence-text"></p>
+          <button id="view-evidence" class="quiet" type="button" hidden></button>
+        </section>
+        <section id="question" class="question" hidden>
+          <h3>A detail to clarify</h3>
+          <p>Can you complete the internship on site for the full period shown in this posting?</p>
+          <button id="answer" class="primary" type="button">Confirm sample availability</button>
+        </section>
+        <div id="demo-controls" class="demo-controls">
+          <span>Walkthrough control</span>
+          <button id="next" class="primary" type="button"></button>
+        </div>
+      </article>
+    </section>
+    <section id="activity" class="view" aria-label="Activity" hidden>
+      <section class="panel" aria-labelledby="agents-title"><h2 id="agents-title">Workers</h2><ul id="agents" class="agents"></ul></section>
+      <section class="panel" aria-labelledby="log-title"><h2 id="log-title">Activity log</h2><ol id="log" class="activity-log"></ol></section>
     </section>
   </main>
   <dialog id="dialog" aria-labelledby="dialog-title">
